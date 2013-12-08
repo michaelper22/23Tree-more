@@ -107,29 +107,32 @@ class Tree{
 		updateKeys(spot->parent);	
 	}//updateKeys()
 	
-	void insert(int data){
-		Node* spot = findSpot(root, data);
+	void insert(Node* spot, Node* newData){
 
 		// Case 0: Spot has 0 children
-		if(spot->child1 == NULL && spot->child2 == NULL && spot->child3 == NULL)
-			spot->child1 = new Node(spot, data);
+		if(spot->child1 == NULL && spot->child2 == NULL && spot->child3 == NULL){
+			newData->parent=spot;
+			spot->child1 = newData;
+		}
 			
 		// Case 1: Spot has 1 child
 		else if(spot->child1 != NULL && spot->child2 == NULL && spot->child3 == NULL){
-			if(spot->child1->key2 <= data)
-				spot->child2 = new Node(spot, data);
+			newData->parent=spot;
+			if(spot->child1->key2 <= newData->key2)
+				spot->child2 = new Node(spot, newData->key2);
 			else {
 				spot->child2 = spot->child1;
-				spot->child1 = new Node(spot, data);
+				spot->child1 = new Node(spot, newData->key2);
 			}//else
 		}//else if
 		
 		// Case 2: Spot has 2 children
 		else if(spot->child1 != NULL && spot->child2 != NULL && spot->child3 == NULL){
+			newData->parent=spot;
 			// Modified bubble sort from beginning of semester
 			// to put children in ascending order
 			// It's O(n^2), but we only have 4 items max
-			int children[3] = {spot->child1->key2, spot->child2->key2, data};
+			int children[3] = {spot->child1->key2, spot->child2->key2, newData->key2};
 			int begin=0, end=2, swapflag=1, walker;
 
 			while(end>begin && swapflag>0){
@@ -155,14 +158,7 @@ class Tree{
 		// code to come
 		
 		else if(spot->child1 != NULL && spot->child2 != NULL && spot->child3 != NULL){
-			/* Subcases:
-			3.1. Spot is child1 of its parent
-				3.1.1. Child
-				3.1.2. Child2 of spot's parent has two children. Add the fourth child from spot
-				3.1.2.
-			3.2. Spot is child2 of its parent
-			3.3. Spot is child3 of its parent.
-			*/
+			
 		
 		
 		
@@ -221,6 +217,8 @@ int main(){
 	while(!infile.eof()){
 		int input;
 		infile >> input;
+		Node* spot = findSpot(tree->root, input);
+		Node* newNode = new Node(null, input);
 		tree->insert(input);
 		tree->printTree(tree->root, outfile);
 		outfile << "--------" << endl;

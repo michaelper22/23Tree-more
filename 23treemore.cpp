@@ -158,10 +158,33 @@ class Tree{
 		// code to come
 		
 		else if(spot->child1 != NULL && spot->child2 != NULL && spot->child3 != NULL){
+			int children[4] = {spot->child1->key2, spot->child2->key2,
+				spot->child3->key2, newData->key2};
+			int begin=0, end=3, swapflag=1, walker;
+
+			while(end>begin && swapflag>0){
+				swapflag=0;
+				walker=begin;		
+				while(walker < end){
+					if(children[walker] > children[walker+1]){
+						//swap
+						int temp=children[walker];
+						children[walker]=children[walker+1];
+						children[walker+1]=temp;
+						swapflag++;
+						walker++;
+					}//if
+					end--;
+				}//while
+			}//while
 			
-		
-		
-		
+			spot->child1->key2 = children[0];
+			spot->child2->key2 = children[1];
+			Node* newNode = new Node(NULL, -1, -1, NULL, NULL, NULL);
+			Node* newChild1 = new Node(newNode, children[2]);
+			Node* newChild2 = new Node(newNode, children[3]);
+			
+			insert(spot->parent, newNode);
 		}
 		
 		

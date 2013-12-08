@@ -217,9 +217,9 @@ int main(){
 	while(!infile.eof()){
 		int input;
 		infile >> input;
-		Node* spot = findSpot(tree->root, input);
-		Node* newNode = new Node(null, input);
-		tree->insert(input);
+		Node* spot = tree->findSpot(tree->root, input);
+		Node* newNode = new Node(NULL, input);
+		tree->insert(spot, newNode);
 		tree->printTree(tree->root, outfile);
 		outfile << "--------" << endl;
 	}//while

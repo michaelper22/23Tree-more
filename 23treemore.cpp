@@ -30,7 +30,7 @@ class Node{
 	}//Node()
 	
 	void printNode(fstream& outstream){
-		outstream << "(parent = ";
+		outstream << "(parent.key1 = ";
 		
 		if(parent!=NULL)
 			outstream << parent->key1;
@@ -108,40 +108,49 @@ class Tree{
 	}//updateKeys()
 	
 	void insert(Node* spot, Node* newData){
+		cout << "In insert();" << endl <<
+			"newData->key1 = " << newData->key1 << ", newData->key2 = " << newData->key2 << endl;
 
 		// Case 0: Spot has 0 children
 		if(spot->child1 == NULL && spot->child2 == NULL && spot->child3 == NULL){
+		cout << "Case 0" << endl;
 			newData->parent=spot;
 			spot->child1 = newData;
 		}
 			
 		// Case 1: Spot has 1 child
 		else if(spot->child1 != NULL && spot->child2 == NULL && spot->child3 == NULL){
+			cout << "Case 1" << endl;
 			newData->parent=spot;
-			if(spot->child1->key2 <= newData->key2)
-				spot->child2 = new Node(spot, newData->key2);
+			if(spot->child1->key2 <= newData->key2){
+				spot->child2 = newData;
+				cout << "spot->child2 = newData" << endl;
+			}
 			else {
 				spot->child2 = spot->child1;
-				spot->child1 = new Node(spot, newData->key2);
+				spot->child1 = newData;
 			}//else
+			
 		}//else if
 		
 		// Case 2: Spot has 2 children
 		else if(spot->child1 != NULL && spot->child2 != NULL && spot->child3 == NULL){
+			cout << "Case 2" << endl;
 			newData->parent=spot;
 			// Modified bubble sort from beginning of semester
 			// to put children in ascending order
 			// It's O(n^2), but we only have 4 items max
-			int children[3] = {spot->child1->key2, spot->child2->key2, newData->key2};
+			Node* children[3] = {spot->child1, spot->child2, newData};
 			int begin=0, end=2, swapflag=1, walker;
 
 			while(end>begin && swapflag>0){
-				swapflag=0;
-				walker=begin;		
+				walker=begin;
+				if(swapflag>=1)
+					swapflag=0;
 				while(walker < end){
-					if(children[walker] > children[walker+1]){
+					if(children[walker]->key2 > children[walker+1]->key2){
 						//swap
-						int temp=children[walker];
+						Node* temp=children[walker];
 						children[walker]=children[walker+1];
 						children[walker+1]=temp;
 						swapflag++;
@@ -150,42 +159,71 @@ class Tree{
 					end--;
 				}//while
 			}//while
-			spot->child1->key2 = children[0];
-			spot->child2->key2 = children[1];
-			spot->child3 = new Node(spot, children[2]);
+			spot->child1 = children[0];
+			spot->child2 = children[1];
+			spot->child3 = children[2];
 		}//if
-		// Case 3: Spot has 3 children
-		// code to come
 		
+		// Case 3: Spot has 3 children
 		else if(spot->child1 != NULL && spot->child2 != NULL && spot->child3 != NULL){
-			int children[4] = {spot->child1->key2, spot->child2->key2,
-				spot->child3->key2, newData->key2};
+			cout << "Case 3" << endl;
+			Node* children[4] = {spot->child1, spot->child2,
+				spot->child3, newData};
 			int begin=0, end=3, swapflag=1, walker;
+			cout << "Done building array; starting sort" << endl;
 
 			while(end>begin && swapflag>0){
 				swapflag=0;
 				walker=begin;		
 				while(walker < end){
-					if(children[walker] > children[walker+1]){
+					cout << "In while(); walker = " << walker << endl;
+					if(children[walker]->key1 > children[walker+1]->key1){
+						cout << "In if();"<< endl;
+						cout << "children[" << walker << "]==" << children[walker] << endl;
 						//swap
-						int temp=children[walker];
+						Node* temp=children[walker];
+						cout << "Node* temp=children[walker];" << endl;
 						children[walker]=children[walker+1];
+						cout << "children[walker]=children[walker+1];" << endl;
 						children[walker+1]=temp;
+						cout << "children[walker+1]=temp;" << endl;
 						swapflag++;
 						walker++;
 					}//if
 					end--;
 				}//while
 			}//while
+			cout << "Done sorting" << endl;
 			
-			spot->child1->key2 = children[0];
-			spot->child2->key2 = children[1];
+			cout << "Printing contents of 4 nodes" << endl;
+			for(int i=0; i<4; i++){
+				cout << "children[" << i << "].key2 = " << children[i]->key2 << endl;
+			}
+			
+			spot->child1 = children[0];
+			spot->child2 = children[1];
+			spot->child3 = NULL;
+			
 			Node* newNode = new Node(NULL, -1, -1, NULL, NULL, NULL);
-			Node* newChild1 = new Node(newNode, children[2]);
-			Node* newChild2 = new Node(newNode, children[3]);
+			Node* newChild1 = children[2];
+			Node* newChild2 = children[3];
+			newNode->child1 = newChild1;
+			newNode->child2 = newChild2;
+			newNode->child1->parent = newNode;
+			newNode->child2->parent = newNode;
 			
+			updateKeys(spot);
+			updateKeys(newNode);
+			
+			
+			//cout << "About to make recursive call of insert()" << endl;
+			
+			if(spot->parent==NULL){
+				root = spot->parent = new Node(NULL, -1, -1, spot, newNode, NULL);
+				newNode->parent = spot->parent;
+			}//if
 			insert(spot->parent, newNode);
-		}
+		}//else if
 		
 		
 		// Update the keys
@@ -242,10 +280,11 @@ int main(){
 		infile >> input;
 		Node* spot = tree->findSpot(tree->root, input);
 		Node* newNode = new Node(NULL, input);
+		outfile << "Tree with " << input << " inserted:" << endl;
 		tree->insert(spot, newNode);
 		tree->printTree(tree->root, outfile);
 		outfile << "--------" << endl;
 	}//while
-	
+	cout << "Completed insert operation" << endl;
 	return 0;
 }//main()
